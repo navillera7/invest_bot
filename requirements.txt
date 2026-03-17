@@ -1,4 +1,4 @@
-pyTelegramBotAPI==4.14.0
-FinanceDataReader==0.9.60
+pyTelegramBotAPI
+FinanceDataReader
 pandas
-Flask==3.0.0
+Flask
