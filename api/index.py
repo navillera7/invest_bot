@@ -10,7 +10,7 @@ TOKEN = os.environ.get('TELEGRAM_TOKEN')
 bot = telebot.TeleBot(TOKEN, threaded=False)
 app = Flask(__name__)
 
-BOT_USERNAME = '    ' # 본인 봇 아이디로 변경
+BOT_USERNAME = '@tujadoumi_bot' # 본인 봇 아이디로 변경
 
 tickers_dict = {
     "VIX (공포지수)": "^VIX",
