@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 
 # Vercel 환경 변수에서 토큰을 불러옵니다.
 TOKEN = os.environ.get('TELEGRAM_TOKEN')
-bot = telebot.TeleBot(TOKEN)
+# threaded=False 를 추가해서 백그라운드 작업을 막고 동기식으로 꽉 잡아둡니다!
+bot = telebot.TeleBot(TOKEN, threaded=False)
 app = Flask(__name__)
 
 BOT_USERNAME = '    ' # 본인 봇 아이디로 변경
