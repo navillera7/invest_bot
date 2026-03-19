@@ -43,8 +43,8 @@ def get_market_data():
                 change = current_price - prev_price
                 pct_change = (change / prev_price) * 100 if prev_price != 0 else 0.0
                 
-                if change > 0: emoji = "🟥🔼"
-                elif change < 0: emoji = "🟦🔽"
+                if change > 0: emoji = "📈"
+                elif change < 0: emoji = "📉"
                 else: emoji = "➖"
                 
                 result_text += f"▪️ **{name}**\n   {current_price:,.2f} {emoji} {abs(change):.2f} ({pct_change:+.2f}%)\n\n"
