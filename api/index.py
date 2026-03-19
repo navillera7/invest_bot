@@ -18,7 +18,15 @@ tickers_dict = {
     "SOXX (반도체ETF)": "SOXX",
     "USD/KRW (환율)": "USD/KRW",
     "Brent (브렌트유)": "BZ=F",
-    "WTI (서부텍사스유)": "CL=F"
+    "WTI (서부텍사스유)": "CL=F", 
+    "Gold (금)": "GC=F",
+    "Silver (은)": "SI=F",
+    "Copper (구리)": "HG=F",
+    "Natural Gas (천연가스)": "NG=F",
+    "코스피 (KOSPI)": "KS11",
+    "코스닥 (KOSDAQ)": "KQ11",
+    "삼성 전자 (Samsung Electronics)": "005930.KS",
+    "SK 하이닉스 (SK Hynix)": "000660.KS"
 }
 
 def get_market_data():
