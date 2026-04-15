@@ -13,18 +13,19 @@ app = Flask(__name__)
 BOT_USERNAME = '@tujadoumi_bot' # 본인 봇 아이디로 변경
 
 tickers_dict = {
-    "VIX (공포지수)": "^VIX",
-    "SOX (반도체지수)": "^SOX",
-    "SOXX (반도체ETF)": "SOXX",
-    "USD/KRW (환율)": "USD/KRW",
-    "Brent (브렌트유)": "BZ=F",
-    "WTI (서부텍사스유)": "CL=F", 
-    "Gold (금)": "GC=F",
-    "Silver (은)": "SI=F",
-    "Copper (구리)": "HG=F",
-    "Natural Gas (천연가스)": "NG=F",
-    "코스피 (KOSPI)": "KS11",
-    "코스닥 (KOSDAQ)": "KQ11"
+    "VIX 😱 (공포지수)": "^VIX",
+    "SOX 🧦 (반도체지수)": "^SOX",
+    "SOXX 🧦🧦 (반도체ETF)": "SOXX",
+    "USD/KRW 💹 (환율)": "USD/KRW",
+    "Brent 🇳🇴🛢️(브렌트유)": "BZ=F",
+    "WTI 🔫🛢️ (서부텍사스유)": "CL=F", 
+    "Gold 🏆 (금)": "GC=F",
+    "Silver 🪙 (은)": "SI=F",
+    "Copper 🔑 (구리)": "HG=F",
+    "Natural Gas 💨 (천연가스)": "NG=F",
+    "코스피 🇰🇷 (KOSPI)": "KS11",
+    "코스닥 🇰🇷 (KOSDAQ)": "KQ11",
+    "EWY 🇰🇷 (한국ETF)": "EWY"
 }
 
 def get_market_data():
