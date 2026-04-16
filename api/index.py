@@ -60,15 +60,15 @@ def get_market_data():
                 # 1. 한국 종목/ETF인 경우
                 # 1. 한국 주식 (장 운영 시간 엄격 적용)
             if any(x in name for x in ["코스피", "코스닥"]):
-                status_emoji = "🟩" if is_kr_open else "▪️"
+                status_emoji = "🟩" if is_kr_open else "⬛️"
             
             # 2. 환율 및 원자재 (주말만 아니면 24시간 🟩)
             elif any(x in name for x in ["환율", "Brent", "WTI", "Gold", "Silver", "Copper", "Gas"]):
-                status_emoji = "🟩" if not is_weekend else "▪️"
+                status_emoji = "🟩" if not is_weekend else "⬛️"
             
             # 3. 미국 지수 및 ETF (미국 본장 시간 적용)
             else:
-                status_emoji = "🟩" if is_us_open else "▪️"
+                status_emoji = "🟩" if is_us_open else "⬛️"
                 
             if len(df) >= 2:
                 prev_price = df['Close'].iloc[-2]
