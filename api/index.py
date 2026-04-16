@@ -30,28 +30,39 @@ tickers_dict = {
 
 def get_market_data():
     result_text = "📊 **[현재 글로벌 주요 지표]**\n\n"
+    # 충분한 데이터를 위해 기간을 7일로 잡습니다.
     start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
-    
+    now = datetime.now()
+
     for name, ticker in tickers_dict.items():
         try:
             df = fdr.DataReader(ticker, start=start_date)
-            df = df.dropna(subset=['Close']) # 결측치 제거
+            df = df.dropna(subset=['Close'])
             
-            if len(df) >= 2:
+            if not df.empty:
+                # 마지막 데이터의 날짜/시간 확인
+                last_time = df.index[-1]
                 current_price = df['Close'].iloc[-1]
-                prev_price = df['Close'].iloc[-2]
                 
-                change = current_price - prev_price
-                pct_change = (change / prev_price) * 100 if prev_price != 0 else 0.0
-                
-                if change > 0: emoji = "📈"
-                elif change < 0: emoji = "📉"
-                else: emoji = "➖"
-                
-                result_text += f"▪️ **{name}**\n   {current_price:,.2f} {emoji} {abs(change):.2f} ({pct_change:+.2f}%)\n\n"
-            elif len(df) == 1: 
-                current_price = df['Close'].iloc[-1]
-                result_text += f"▪️ **{name}**\n   {current_price:,.2f} (어제 데이터 없음)\n\n"
+                # [장중 판단 로직] 
+                # 데이터의 마지막 업데이트가 현재 시간으로부터 20분 이내라면 장중(🟩)으로 표시
+                # (참고: 무료 API 특성상 지연 시간이 있을 수 있어 20~30분 여유를 두는 것이 좋습니다)
+                time_diff = now - last_time
+                # 만약 인덱스에 시간 정보가 없고 날짜만 있다면(날짜형 데이터), 
+                # 오늘 날짜와 같으면 장중으로 간주하거나 추가 처리가 필요합니다.
+                is_active = time_diff < timedelta(minutes=20)
+                status_emoji = "🟩" if is_active else "▪️"
+
+                if len(df) >= 2:
+                    prev_price = df['Close'].iloc[-2]
+                    change = current_price - prev_price
+                    pct_change = (change / prev_price) * 100 if prev_price != 0 else 0.0
+                    
+                    trend_emoji = "📈" if change > 0 else "📉" if change < 0 else "➖"
+                    
+                    result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} {trend_emoji} {abs(change):.2f} ({pct_change:+.2f}%)\n\n"
+                else:
+                    result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} (비교 데이터 부족)\n\n"
             else:
                 result_text += f"▪️ {name}: 유효한 데이터 없음\n\n"
         except Exception as e:
