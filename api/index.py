@@ -59,7 +59,7 @@ def get_market_data():
                 # [장중 판단 로직 개선]
                 # 1. 한국 종목/ETF인 경우
                 # 1. 한국 주식 (장 운영 시간 엄격 적용)
-            if any(x in name for x in ["코스피", "코스닥", "EWY"]):
+            if any(x in name for x in ["코스피", "코스닥"]):
                 status_emoji = "🟩" if is_kr_open else "▪️"
             
             # 2. 환율 및 원자재 (주말만 아니면 24시간 🟩)
