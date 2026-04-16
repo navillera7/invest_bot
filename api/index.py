@@ -3,7 +3,7 @@ import telebot
 from flask import Flask, request
 import FinanceDataReader as fdr
 from datetime import datetime, timedelta
-
+import pytz
 # Vercel 환경 변수에서 토큰을 불러옵니다.
 TOKEN = os.environ.get('TELEGRAM_TOKEN')
 # threaded=False 를 추가해서 백그라운드 작업을 막고 동기식으로 꽉 잡아둡니다!
@@ -30,9 +30,23 @@ tickers_dict = {
 
 def get_market_data():
     result_text = "📊 **[현재 글로벌 주요 지표]**\n\n"
-    # 충분한 데이터를 위해 기간을 7일로 잡습니다.
-    start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
-    now = datetime.now()
+    
+    # 시간대 설정
+    kst = pytz.timezone('Asia/Seoul')
+    est = pytz.timezone('America/New_York')
+    
+    now_kst = datetime.now(kst)
+    now_est = datetime.now(est)
+    
+    # 한국 장중 확인 (월~금, 09:00 ~ 15:30)
+    is_kr_open = now_kst.weekday() < 5 and 9 <= now_kst.hour < 16
+    if now_kst.hour == 15 and now_kst.minute > 30: is_kr_open = False
+
+    # 미국 장중 확인 (월~금, 09:30 ~ 16:00 / 썸머타임 미고려시 대략적 계산)
+    is_us_open = now_est.weekday() < 5 and 9 <= now_est.hour < 16
+    if now_est.hour == 9 and now_est.minute < 30: is_us_open = False
+
+    start_date = (now_kst - timedelta(days=7)).strftime('%Y-%m-%d')
 
     for name, ticker in tickers_dict.items():
         try:
@@ -40,33 +54,29 @@ def get_market_data():
             df = df.dropna(subset=['Close'])
             
             if not df.empty:
-                # 마지막 데이터의 날짜/시간 확인
-                last_time = df.index[-1]
                 current_price = df['Close'].iloc[-1]
                 
-                # [장중 판단 로직] 
-                # 데이터의 마지막 업데이트가 현재 시간으로부터 20분 이내라면 장중(🟩)으로 표시
-                # (참고: 무료 API 특성상 지연 시간이 있을 수 있어 20~30분 여유를 두는 것이 좋습니다)
-                time_diff = now - last_time
-                # 만약 인덱스에 시간 정보가 없고 날짜만 있다면(날짜형 데이터), 
-                # 오늘 날짜와 같으면 장중으로 간주하거나 추가 처리가 필요합니다.
-                is_active = time_diff < timedelta(minutes=20)
-                status_emoji = "🟩" if is_active else "▪️"
-
+                # [장중 판단 로직 개선]
+                # 1. 한국 종목/ETF인 경우
+                if any(x in name for x in ["코스피", "코스닥", "EWY", "USD/KRW"]):
+                    status_emoji = "🟩" if is_kr_open else "▪️"
+                # 2. 미국 지수/원자재/VIX (대부분 미국 시간 기준)
+                else:
+                    status_emoji = "🟩" if is_us_open else "▪️"
+                
                 if len(df) >= 2:
                     prev_price = df['Close'].iloc[-2]
                     change = current_price - prev_price
                     pct_change = (change / prev_price) * 100 if prev_price != 0 else 0.0
                     
                     trend_emoji = "📈" if change > 0 else "📉" if change < 0 else "➖"
-                    
                     result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} {trend_emoji} {abs(change):.2f} ({pct_change:+.2f}%)\n\n"
                 else:
-                    result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} (비교 데이터 부족)\n\n"
+                    result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} (데이터 부족)\n\n"
             else:
-                result_text += f"▪️ {name}: 유효한 데이터 없음\n\n"
+                result_text += f"▪️ {name}: 데이터 없음\n\n"
         except Exception as e:
-            result_text += f"▪️ {name}: 데이터 로드 에러\n\n"
+            result_text += f"▪️ {name}: 에러\n\n"
             
     return result_text
 
