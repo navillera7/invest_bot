@@ -37,7 +37,7 @@ def get_market_data():
     
     now_kst = datetime.now(kst)
     now_est = datetime.now(est)
-    
+    is_weekend = now_kst.weekday() >= 5
     # 한국 장중 확인 (월~금, 09:00 ~ 15:30)
     is_kr_open = now_kst.weekday() < 5 and 9 <= now_kst.hour < 16
     if now_kst.hour == 15 and now_kst.minute > 30: is_kr_open = False
@@ -58,23 +58,29 @@ def get_market_data():
                 
                 # [장중 판단 로직 개선]
                 # 1. 한국 종목/ETF인 경우
-                if any(x in name for x in ["코스피", "코스닥", "EWY", "USD/KRW"]):
-                    status_emoji = "🟩" if is_kr_open else "▪️"
-                # 2. 미국 지수/원자재/VIX (대부분 미국 시간 기준)
-                else:
-                    status_emoji = "🟩" if is_us_open else "▪️"
-                
-                if len(df) >= 2:
-                    prev_price = df['Close'].iloc[-2]
-                    change = current_price - prev_price
-                    pct_change = (change / prev_price) * 100 if prev_price != 0 else 0.0
-                    
-                    trend_emoji = "📈" if change > 0 else "📉" if change < 0 else "➖"
-                    result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} {trend_emoji} {abs(change):.2f} ({pct_change:+.2f}%)\n\n"
-                else:
-                    result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} (데이터 부족)\n\n"
+                # 1. 한국 주식 (장 운영 시간 엄격 적용)
+            if any(x in name for x in ["코스피", "코스닥", "EWY"]):
+                status_emoji = "🟩" if is_kr_open else "▪️"
+            
+            # 2. 환율 및 원자재 (주말만 아니면 24시간 🟩)
+            elif any(x in name for x in ["환율", "Brent", "WTI", "Gold", "Silver", "Copper", "Gas"]):
+                status_emoji = "🟩" if not is_weekend else "▪️"
+            
+            # 3. 미국 지수 및 ETF (미국 본장 시간 적용)
             else:
-                result_text += f"▪️ {name}: 데이터 없음\n\n"
+                status_emoji = "🟩" if is_us_open else "▪️"
+                
+            if len(df) >= 2:
+                prev_price = df['Close'].iloc[-2]
+                change = current_price - prev_price
+                pct_change = (change / prev_price) * 100 if prev_price != 0 else 0.0
+                
+                trend_emoji = "📈" if change > 0 else "📉" if change < 0 else "➖"
+                result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} {trend_emoji} {abs(change):.2f} ({pct_change:+.2f}%)\n\n"
+            else:
+                result_text += f"{status_emoji} **{name}**\n   {current_price:,.2f} (데이터 부족)\n\n"
+        except Exception as e:
+            result_text += f"▪️ {name}: 에러\n\n"
         except Exception as e:
             result_text += f"▪️ {name}: 에러\n\n"
             
