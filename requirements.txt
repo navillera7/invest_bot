@@ -2,3 +2,4 @@ pyTelegramBotAPI
 finance-dataReader
 pandas
 Flask
+pytz
